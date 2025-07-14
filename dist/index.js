@@ -19,8 +19,15 @@ const comentarioRoutes_1 = __importDefault(require("./codigos/routes/comentarioR
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const rutaImagenes = path_1.default.join(process.cwd(), 'imagenes');
+// Configurar orígenes permitidos desde variables de entorno
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : [
+        'http://localhost:5173', // Desarrollo local
+        'https://dasnellia.github.io' // Producción en GitHub Pages
+    ];
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express_1.default.json());

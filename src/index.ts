@@ -17,8 +17,16 @@ dotenv.config();
 const app = express();
 const rutaImagenes = path.join(process.cwd(), 'imagenes');
 
+// Configurar orígenes permitidos desde variables de entorno
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : [
+      'http://localhost:5173',      // Desarrollo local
+      'https://dasnellia.github.io' // Producción en GitHub Pages
+    ];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 
