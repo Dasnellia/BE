@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../../prisma/client';
-import { Venta } from '@prisma/client';
+import { Venta } from '../../generated/client';
 
 export const totalUsuarios = async (_req: Request, res: Response) => {
   try {

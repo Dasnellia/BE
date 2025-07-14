@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../prisma/client';
 
 // Obtener los comentarios de un juego
 export const getComentarios = async (req: Request, res: Response) => {
