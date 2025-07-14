@@ -1,3 +1,5 @@
+//juegoController.ts
+
 import { Request, Response } from 'express';
 import * as juegoService from '../services/juegoService';
 import prisma from '../../prisma/client';
