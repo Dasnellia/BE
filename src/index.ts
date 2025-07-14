@@ -27,9 +27,28 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origen no permitido por CORS'));
+    }
+  },
   credentials: true
 }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204); // responde rápido a preflight
+  }
+
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());

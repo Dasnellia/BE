@@ -41,9 +41,9 @@ export const login = async (req: Request, res: Response) => {
 
         res.cookie('token', token, {
           httpOnly: true,
-          secure: false, 
-          sameSite: 'lax',
-          maxAge: 3600000 
+          secure: true,
+          sameSite: 'none',
+          maxAge: 3600000
         });
 
         const { contrasena: _, ...usuarioSinContrasena } = usuario;
