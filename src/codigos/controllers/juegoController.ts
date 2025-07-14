@@ -2,9 +2,30 @@ import { Request, Response } from 'express';
 import * as juegoService from '../services/juegoService';
 import prisma from '../../prisma/client';
 
+
 export const obtenerTodos = async (_req: Request, res: Response) => {
   const juegos = await juegoService.obtenerTodos();
   res.json(juegos);
+};
+
+export const obtenerJuegos = async (req: Request, res: Response) => {
+  try {
+    const juegos = await prisma.juego.findMany({
+      include: {
+        categoria: true,
+        plataformas: true,
+        comentarios: true,
+        _count: {
+          select: { ventas: true }
+        }
+      }
+    });
+
+    res.json(juegos);
+  } catch (error) {
+    console.error("Error al obtener juegos:", error);
+    res.status(500).json({ mensaje: "Error del servidor" });
+  }
 };
 
 export const obtenerPorId = async (req: Request, res: Response) => {
@@ -62,5 +83,81 @@ export const eliminarTodos = async (_req: Request, res: Response) => {
     res.json({ mensaje: 'Todos los juegos fueron eliminados.' });
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar todos los juegos', detalle: error });
+  }
+};
+
+export const crearJuegosMasivos = async (req: Request, res: Response) => {
+  const juegos = req.body;
+
+  try {
+    for (const juego of juegos) {
+      // Buscar la categoría por nombre
+      const categoria = await prisma.categoria.findFirst({
+        where: { nombre: juego.categoria }
+      });
+
+      if (!categoria) {
+        throw new Error(`❌ Categoría no encontrada: ${juego.categoria}`);
+      }
+
+      // Buscar plataformas por nombre
+      const plataformas = await prisma.plataforma.findMany({
+        where: { nombre: { in: juego.plataformas } }
+      });
+
+      if (plataformas.length !== juego.plataformas.length) {
+        throw new Error(`❌ Algunas plataformas no existen: ${juego.plataformas.join(', ')}`);
+      }
+
+      await prisma.juego.create({
+        data: {
+          nombre: juego.nombre,
+          precio: juego.precio,
+          stock: juego.stock,
+          rating: juego.rating,
+          imagen: juego.imagen,
+          descripcion: juego.descripcion,
+          descripcionLarga: juego.descripcionLarga,
+          trailerURL: juego.trailerURL,
+          descuento: juego.descuento || 0,
+          lanzamiento: new Date(juego.lanzamiento),
+          categoria: {
+            connect: { id: categoria.id }
+          },
+          plataformas: {
+            connect: plataformas.map((p : {id : number}) => ({ id: p.id }))
+          },
+          galeria: { set: juego.galeria },
+          caracteristicas: { set: juego.caracteristicas }
+        }
+      });
+    }
+
+    res.status(201).json({ mensaje: '✅ Juegos registrados correctamente' });
+  } catch (error: any) {
+    console.error('❌ Error al registrar juegos:', error.message);
+    res.status(500).json({ error: `Error al registrar juegos: ${error.message}` });
+  }
+};
+
+export const obtenerJuegosMasVendidos = async (_req: Request, res: Response) => {
+  try {
+    const juegos = await prisma.juego.findMany({
+      include: {
+        _count: {
+          select: { ventas: true },
+        },
+        categoria: true,
+        plataformas: true,
+      },
+    });
+
+    // Ordenar por cantidad de ventas (ventas._count.ventas)
+    const ordenados = juegos.sort((a, b) => b._count.ventas - a._count.ventas);
+
+    res.json(ordenados);
+  } catch (error) {
+    console.error('Error al obtener los juegos más vendidos:', error);
+    res.status(500).json({ error: 'Error al obtener los juegos más vendidos' });
   }
 };
