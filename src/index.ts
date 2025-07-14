@@ -21,8 +21,9 @@ const rutaImagenes = path.join(process.cwd(), 'imagenes');
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : [
-      'http://localhost:5173',      // Desarrollo local
-      'https://dasnellia.github.io' // Producción en GitHub Pages
+      'http://localhost:5173',           // Desarrollo local
+      'https://dasnellia.github.io',     // GitHub Pages raíz
+      'https://dasnellia.github.io/GVFront' // Frontend en GitHub Pages
     ];
 
 app.use(cors({

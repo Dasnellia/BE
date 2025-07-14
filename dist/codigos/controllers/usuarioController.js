@@ -76,7 +76,11 @@ const login = async (req, res) => {
                 res.status(403).json({ error: 'Debes confirmar tu cuenta desde el correo' });
             }
             else {
-                const token = jsonwebtoken_1.default.sign({ id: usuario.id, tipo: usuario.tipo }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const jwtSecret = process.env.JWT_SECRET;
+                if (!jwtSecret) {
+                    throw new Error('JWT_SECRET no está configurado');
+                }
+                const token = jsonwebtoken_1.default.sign({ id: usuario.id, tipo: usuario.tipo }, jwtSecret, { expiresIn: '1h' });
                 res.cookie('token', token, {
                     httpOnly: true,
                     secure: false,
@@ -157,7 +161,11 @@ const enviarTokenContrasena = async (req, res) => {
             res.status(404).json({ error: 'Usuario no encontrado' });
         }
         else {
-            const token = jsonwebtoken_1.default.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '10m' });
+            const jwtSecret = process.env.JWT_SECRET;
+            if (!jwtSecret) {
+                return res.status(500).json({ error: 'Error de configuración del servidor' });
+            }
+            const token = jsonwebtoken_1.default.sign({ id: usuario.id }, jwtSecret, { expiresIn: '10m' });
             await client_1.default.usuario.update({
                 where: { id: usuario.id },
                 data: { token }

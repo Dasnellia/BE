@@ -28,9 +28,14 @@ export const login = async (req: Request, res: Response) => {
       } else if (!usuario.verificado) {
         res.status(403).json({ error: 'Debes confirmar tu cuenta desde el correo' });
       } else {
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+          throw new Error('JWT_SECRET no está configurado');
+        }
+
         const token = jwt.sign(
           { id: usuario.id, tipo: usuario.tipo },
-          process.env.JWT_SECRET!,
+          jwtSecret,
           { expiresIn: '1h' }
         );
 
@@ -113,7 +118,12 @@ export const enviarTokenContrasena = async (req: Request, res: Response) => {
     if (!usuario) {
       res.status(404).json({ error: 'Usuario no encontrado' });
     } else {
-      const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET!, { expiresIn: '10m' });
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        return res.status(500).json({ error: 'Error de configuración del servidor' });
+      }
+
+      const token = jwt.sign({ id: usuario.id }, jwtSecret, { expiresIn: '10m' });
 
       await prisma.usuario.update({
         where: { id: usuario.id },
