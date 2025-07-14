@@ -1,3 +1,5 @@
+//usuarioController.ts
+
 import { Request, Response } from 'express';
 import * as UsuarioService from '../services/usuarioService';
 import prisma from '../../prisma/client';
