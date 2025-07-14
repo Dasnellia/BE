@@ -1,3 +1,5 @@
+//usuarioRoutes.ts
+
 import { Router } from 'express';
 import * as usuarioController from '../controllers/usuarioController';
 import { validarRegistro } from '../../middleware/validarRegistro';
